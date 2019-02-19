@@ -18,3 +18,7 @@ Please read the [contribution guidelines](https://github.com/opencv/opencv/wiki/
 * Include tests and documentation;
 * Clean up "oops" commits before submitting;
 * Follow the [coding style guide](https://github.com/opencv/opencv/wiki/Coding_Style_Guide).
+
+#### combile with cuda
+It is trivial to point out that libGL.so must be linked from a valid nvidia proprietory driver
+/usr/lib/x86_64-linux-gnu/libGL.so -> /usr/lib/nvidia-410/libGL.so
