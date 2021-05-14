@@ -1,5 +1,4 @@
 project(libprotobuf)
-
 include(CheckIncludeFiles)
 
 if(HAVE_PTHREAD)
@@ -21,12 +20,18 @@ else()
                                        -Wundef -Wtautological-undefined-compare -Wignored-qualifiers -Wextra
                                        -Wunused-function -Wunused-const-variable -Wshorten-64-to-32 -Wno-invalid-offsetof
                                        -Wenum-compare-switch
+                                       -Wsuggest-override -Winconsistent-missing-override
+                                       -Wimplicit-fallthrough
+                                       -Warray-bounds  # GCC 9+
   )
 endif()
 if(CV_ICC)
   ocv_warnings_disable(CMAKE_CXX_FLAGS
       -wd265 -wd858 -wd873 -wd2196
   )
+endif()
+if(CV_GCC AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 8.0)
+  ocv_warnings_disable(CMAKE_CXX_FLAGS -Wclass-memaccess)
 endif()
 
 # Easier to support different versions of protobufs
@@ -135,17 +140,29 @@ append_if_exist(Protobuf_SRCS
   ${PROTOBUF_ROOT}/src/google/protobuf/wrappers.pb.cc
 )
 
-add_library(libprotobuf STATIC ${Protobuf_SRCS})
-ocv_include_directories(${PROTOBUF_ROOT}/src)
-
+include_directories(BEFORE "${PROTOBUF_ROOT}/src")  # ensure using if own headers: https://github.com/opencv/opencv/issues/13328
+add_library(libprotobuf STATIC ${OPENCV_3RDPARTY_EXCLUDE_FROM_ALL} ${Protobuf_SRCS})
+target_include_directories(libprotobuf SYSTEM PUBLIC $<BUILD_INTERFACE:${PROTOBUF_ROOT}/src>)
 set_target_properties(libprotobuf
     PROPERTIES
     FOLDER "3rdparty"
     OUTPUT_NAME libprotobuf
     DEBUG_POSTFIX "${OPENCV_DEBUG_POSTFIX}"
+    COMPILE_PDB_NAME libprotobuf
+    COMPILE_PDB_NAME_DEBUG "libprotobuf${OPENCV_DEBUG_POSTFIX}"
     ARCHIVE_OUTPUT_DIRECTORY ${3P_LIBRARY_OUTPUT_PATH}
     )
 
-if(NOT BUILD_SHARED_LIBS)
-  ocv_install_target(libprotobuf EXPORT OpenCVModules ARCHIVE DESTINATION ${OPENCV_3P_LIB_INSTALL_PATH} COMPONENT dev)
+if(ANDROID)
+  # https://github.com/opencv/opencv/issues/17282
+  target_link_libraries(libprotobuf INTERFACE "-landroid" "-llog")
 endif()
+
+get_protobuf_version(Protobuf_VERSION "${PROTOBUF_ROOT}/src")
+set(Protobuf_VERSION ${Protobuf_VERSION} CACHE INTERNAL "" FORCE)
+
+if(NOT BUILD_SHARED_LIBS)
+  ocv_install_target(libprotobuf EXPORT OpenCVModules ARCHIVE DESTINATION ${OPENCV_3P_LIB_INSTALL_PATH} COMPONENT dev OPTIONAL)
+endif()
+
+ocv_install_3rdparty_licenses(protobuf LICENSE README.md)

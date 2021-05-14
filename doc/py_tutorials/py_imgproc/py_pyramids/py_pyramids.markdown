@@ -12,15 +12,15 @@ In this chapter,
 Theory
 ------
 
-Normally, we used to work with an image of constant size. But in some occassions, we need to work
-with images of different resolution of the same image. For example, while searching for something in
-an image, like face, we are not sure at what size the object will be present in the image. In that
-case, we will need to create a set of images with different resolution and search for object in all
-the images. These set of images with different resolution are called Image Pyramids (because when
-they are kept in a stack with biggest image at bottom and smallest image at top look like a
-pyramid).
+Normally, we used to work with an image of constant size. But on some occasions, we need to work
+with (the same) images in different resolution. For example, while searching for something in
+an image, like face, we are not sure at what size the object will be present in said image. In that
+case, we will need to create a set of the same image with different resolutions and search for object
+in all of them. These set of images with different resolutions are called **Image Pyramids** (because
+when they are kept in a stack with the highest resolution image at the bottom and the lowest resolution
+image at top, it looks like a pyramid).
 
-There are two kinds of Image Pyramids. 1) Gaussian Pyramid and 2) Laplacian Pyramids
+There are two kinds of Image Pyramids. 1) **Gaussian Pyramid** and 2) **Laplacian Pyramids**
 
 Higher level (Low resolution) in a Gaussian Pyramid is formed by removing consecutive rows and
 columns in Lower level (higher resolution) image. Then each pixel in higher level is formed by the
@@ -88,27 +88,27 @@ B = cv.imread('orange.jpg')
 # generate Gaussian pyramid for A
 G = A.copy()
 gpA = [G]
-for i in xrange(6):
+for i in range(6):
     G = cv.pyrDown(G)
     gpA.append(G)
 
 # generate Gaussian pyramid for B
 G = B.copy()
 gpB = [G]
-for i in xrange(6):
+for i in range(6):
     G = cv.pyrDown(G)
     gpB.append(G)
 
 # generate Laplacian Pyramid for A
 lpA = [gpA[5]]
-for i in xrange(5,0,-1):
+for i in range(5,0,-1):
     GE = cv.pyrUp(gpA[i])
     L = cv.subtract(gpA[i-1],GE)
     lpA.append(L)
 
 # generate Laplacian Pyramid for B
 lpB = [gpB[5]]
-for i in xrange(5,0,-1):
+for i in range(5,0,-1):
     GE = cv.pyrUp(gpB[i])
     L = cv.subtract(gpB[i-1],GE)
     lpB.append(L)
@@ -122,7 +122,7 @@ for la,lb in zip(lpA,lpB):
 
 # now reconstruct
 ls_ = LS[0]
-for i in xrange(1,6):
+for i in range(1,6):
     ls_ = cv.pyrUp(ls_)
     ls_ = cv.add(ls_, LS[i])
 

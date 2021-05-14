@@ -15,6 +15,8 @@ if(NOT WIN32)
   endif()
 endif()
 
+ocv_warnings_disable(CMAKE_C_FLAGS -Wimplicit-fallthrough)
+
 ocv_include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
 set(ITT_INCLUDE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
@@ -35,7 +37,7 @@ set(ITT_SRCS
     src/ittnotify/jitprofiling.c
 )
 
-add_library(${ITT_LIBRARY} STATIC ${ITT_SRCS} ${ITT_PUBLIC_HDRS} ${ITT_PRIVATE_HDRS})
+add_library(${ITT_LIBRARY} STATIC ${OPENCV_3RDPARTY_EXCLUDE_FROM_ALL} ${ITT_SRCS} ${ITT_PUBLIC_HDRS} ${ITT_PRIVATE_HDRS})
 
 if(NOT WIN32)
   if(HAVE_DL_LIBRARY)
@@ -58,5 +60,7 @@ if(ENABLE_SOLUTION_FOLDERS)
 endif()
 
 if(NOT BUILD_SHARED_LIBS)
-  ocv_install_target(${ITT_LIBRARY} EXPORT OpenCVModules ARCHIVE DESTINATION ${OPENCV_3P_LIB_INSTALL_PATH} COMPONENT dev)
+  ocv_install_target(${ITT_LIBRARY} EXPORT OpenCVModules ARCHIVE DESTINATION ${OPENCV_3P_LIB_INSTALL_PATH} COMPONENT dev OPTIONAL)
 endif()
+
+ocv_install_3rdparty_licenses(ittnotify src/ittnotify/LICENSE.BSD src/ittnotify/LICENSE.GPL)

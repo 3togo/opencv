@@ -20,6 +20,10 @@ if(APPLE)
   list(APPEND HIGHGUI_LIBRARIES ${ZLIB_LIBRARIES})
 endif()
 
+if(HAVE_WEBP)
+  add_definitions(-DHAVE_WEBP)
+endif()
+
 set(highgui_hdrs
     ${CMAKE_CURRENT_LIST_DIR}/src/precomp.hpp
     )
@@ -114,18 +118,18 @@ elseif(WINRT)
   endif()
 elseif(HAVE_WIN32UI)
   list(APPEND highgui_srcs ${CMAKE_CURRENT_LIST_DIR}/src/window_w32.cpp)
+  if(OpenCV_ARCH STREQUAL "ARM64")
+    list(APPEND HIGHGUI_LIBRARIES "comdlg32" "advapi32")
+  endif()
 elseif(HAVE_GTK OR HAVE_GTK3)
   list(APPEND highgui_srcs ${CMAKE_CURRENT_LIST_DIR}/src/window_gtk.cpp)
-elseif(HAVE_CARBON)
-  list(APPEND highgui_srcs ${CMAKE_CURRENT_LIST_DIR}/src/window_carbon.cpp)
-  list(APPEND HIGHGUI_LIBRARIES "-framework Carbon" "-framework QuickTime")
 elseif(HAVE_COCOA)
   list(APPEND highgui_srcs ${CMAKE_CURRENT_LIST_DIR}/src/window_cocoa.mm)
   list(APPEND HIGHGUI_LIBRARIES "-framework Cocoa")
 endif()
 
-if(UNIX)
-  #these variables are set by CHECK_MODULE macro
+if(TRUE)
+  # these variables are set by 'ocv_append_build_options(HIGHGUI ...)'
   foreach(P ${HIGHGUI_INCLUDE_DIRS})
     ocv_include_directories(${P})
   endforeach()
@@ -144,7 +148,7 @@ ocv_create_module(${HIGHGUI_LIBRARIES})
 
 macro(ocv_highgui_configure_target)
 if(APPLE)
-  add_apple_compiler_options(the_module)
+  add_apple_compiler_options(${the_module})
 endif()
 
 if(MSVC)

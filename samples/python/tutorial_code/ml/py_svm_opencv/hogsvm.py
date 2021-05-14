@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import cv2 as cv
 import numpy as np
 
@@ -31,7 +33,7 @@ def hog(img):
     return hist
 ## [hog]
 
-img = cv.imread('digits.png',0)
+img = cv.imread(cv.samples.findFile('digits.png'),0)
 if img is None:
     raise Exception("we need the digits.png image from samples/data here !")
 
@@ -44,8 +46,8 @@ test_cells = [ i[50:] for i in cells]
 
 ######     Now training      ########################
 
-deskewed = [map(deskew,row) for row in train_cells]
-hogdata = [map(hog,row) for row in deskewed]
+deskewed = [list(map(deskew,row)) for row in train_cells]
+hogdata = [list(map(hog,row)) for row in deskewed]
 trainData = np.float32(hogdata).reshape(-1,64)
 responses = np.repeat(np.arange(10),250)[:,np.newaxis]
 
@@ -60,12 +62,12 @@ svm.save('svm_data.dat')
 
 ######     Now testing      ########################
 
-deskewed = [map(deskew,row) for row in test_cells]
-hogdata = [map(hog,row) for row in deskewed]
+deskewed = [list(map(deskew,row)) for row in test_cells]
+hogdata = [list(map(hog,row)) for row in deskewed]
 testData = np.float32(hogdata).reshape(-1,bin_n*4)
 result = svm.predict(testData)[1]
 
 #######   Check Accuracy   ########################
 mask = result==responses
 correct = np.count_nonzero(mask)
-print correct*100.0/result.size
+print(correct*100.0/result.size)
